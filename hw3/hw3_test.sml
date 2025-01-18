@@ -99,7 +99,7 @@ assert(first_match (Const(1)) [UnitP, ConstP 2, ConstP 1] = SOME []);
 assert(first_match (Const(10)) [UnitP, ConstP 2, ConstP 1] = NONE);
 assert(first_match (Unit) [UnitP, ConstP 2, ConstP 1] = SOME []);
 assert(first_match (Const(10)) [UnitP, ConstP 2] = NONE);
-first_match (Tuple [
+assert(first_match (Tuple [
         Unit, 
         Tuple [Const 2], 
         Constructor ("Constructor", Unit)
@@ -109,7 +109,7 @@ first_match (Tuple [
         Wildcard,
         ConstP 10
     ]
-;
+= SOME []);
 
 assert(match (Const(3), Variable("a")) = SOME [("a", Const(3))]);
 (* Homework3 Simple Test*)

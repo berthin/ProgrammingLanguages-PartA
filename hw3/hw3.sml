@@ -47,7 +47,8 @@ fun longest_string2(words) = foldl (fn (s1, s2) => if String.size s1 >= String.s
 
 (* 4. *)
 fun longest_string_helper(cmp) = 
-    fn words => foldl (fn (s1, s2) => if cmp(String.size s1, String.size s2) then s1 else s2) "" words;
+    fn words => 
+        foldl (fn (s1, s2) => if cmp(String.size s1, String.size s2) then s1 else s2) "" words;
 
 (* 4.a *)
 fun longest_string3(words) = longest_string_helper (fn (x, y) => x > y) words;
@@ -62,14 +63,21 @@ val longest_capitalized = longest_string1 o only_capitals;
 val rev_string = String.implode o rev o String.explode;
 
 (* 7. *)
-fun first_answer(expr) = 
+
+fun first_answer f xs =
+    case xs of
+        [] => raise NoAnswer
+      | x::xs' => case f x of
+                     SOME v => v
+                   | NONE => first_answer f xs';
+(* fun first_answer(cond) = 
     fn xs => 
         let 
             fun try([]) = raise NoAnswer
-                | try(x::xs') = case expr(x) of NONE => try(xs') | SOME y => y
+                | try(x::xs') = case cond(x) of NONE => try(xs') | SOME y => y
         in
             try(xs)
-        end;
+        end; *)
 
 (* 8. *)
 fun all_answers(cond) =
@@ -94,18 +102,18 @@ fun count_some_var (word, pattern) = g (fn _ => 0) (fn x => if x = word then 1 e
 (* 10 *)
 val check_pat =
     let
-        fun all_variables(pattern) =
+        fun get_all_variables(pattern) =
             case pattern of
                 Variable x => [x]
-              | TupleP ps => List.foldl (fn (p', xs) => all_variables(p') @ xs) [] ps
-              | ConstructorP(_, p') => all_variables(p')
+              | TupleP ps => List.foldl (fn (p', xs) => get_all_variables(p') @ xs) [] ps
+              | ConstructorP(_, p') => get_all_variables(p')
               | _ => []
         
         fun duplicates([]) = false
             | duplicates(x::[]) = false
             | duplicates(x::xs) = (List.exists (fn y => x = y) xs) orelse duplicates(xs)
     in
-        not o duplicates o all_variables
+        not o duplicates o get_all_variables
     end;
 
 
@@ -118,8 +126,7 @@ fun match(v: valu, p: pattern) =
       | (Const x, ConstP y) => if x = y then SOME [] else NONE
       | (Constructor (s1, v'), ConstructorP (s2, p')) => if s1 = s2 then match(v', p') else NONE
       | (Tuple vs, TupleP ps) => 
-        if (List.length vs = List.length ps) then 
-            all_answers match (ListPair.zip(vs, ps))
+        if (List.length vs = List.length ps) then all_answers match (ListPair.zip(vs, ps))
         else NONE
       | _ => NONE;
 
